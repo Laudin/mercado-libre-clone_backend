@@ -203,7 +203,7 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
 })
 
 app.get('/*', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'NotFound.html'));
+   res.sendFile(path.join(__dirname, 'public', '404.html'));
 })
 
 app.listen(port, () => {
