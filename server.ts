@@ -31,7 +31,8 @@ const port = process.env.PORT || 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   origin: 'https://mercado-libre-clon.web.app',
+   origin: 'https://mercado-libre-clone-repo.herokuapp.com',
+   //origin: 'https://mercado-libre-clon.web.app',
    //origin: 'http://localhost:3001',
    credentials: true,
 }))
@@ -61,10 +62,10 @@ function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    })
 }
 
-/* app.get('/', (req: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
-app.get('/manifest.json', (req: Request, res: Response) => {
+/* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
