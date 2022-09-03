@@ -62,7 +62,7 @@ const upload = multer({ storage: storage });
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const app = (0, express_1.default)();
-const port = 3001;
+const port = process.env.PORT || 3001;
 const secret = 'jwt_secret';
 app.use(cors({
     origin: 'https://mercado-libre-clon.web.app',

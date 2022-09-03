@@ -27,7 +27,7 @@ const upload = multer({ storage: storage })
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const app = express()
-const port = 3001
+const port = process.env.PORT || 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
