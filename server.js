@@ -91,16 +91,16 @@ function authorizeUser(req, res, next) {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-/* app.get('/manifest.json', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
-})
-app.get('/static/js/:file', (req: Request, res: Response) => {
-   console.log(req.params.file)
-   res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
-})
-app.get('/static/css/:file', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-}) */
+app.get('/manifest.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
+app.get('/static/js/:file', (req, res) => {
+    console.log(req.params.file);
+    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
+});
+app.get('/static/css/:file', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
+});
 app.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {
