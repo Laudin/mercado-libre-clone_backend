@@ -35,7 +35,8 @@ const port = 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   origin: 'https://mercado-libre-clon.web.app',
+   //origin: 'https://mercado-libre-clon.web.app',
+   origin: 'http://localhost:3001',
    credentials: true,
 }))
 app.use(express.json())
@@ -71,6 +72,7 @@ app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
+   console.log(req.params.file)
    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
 })
 app.get('/static/css/:file', (req: Request, res: Response) => {
