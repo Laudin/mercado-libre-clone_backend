@@ -22,15 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -43,9 +34,9 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const storage = multer.diskStorage({
-    destination: (req, files, cb) => __awaiter(void 0, void 0, void 0, function* () {
+    destination: async (req, files, cb) => {
         cb(null, `static/`);
-    }),
+    },
     filename: (req, files, cb) => {
         //creates a unique id for the img. checks if it exist first
         while (true) {
@@ -65,14 +56,17 @@ const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
 const secret = 'jwt_secret';
 app.use(cors({
-    origin: 'https://mercado-libre-clone-repo.herokuapp.com',
+    //origin: 'https://mercado-libre-clone-repo.herokuapp.com',
     //origin: 'https://mercado-libre-clon.web.app',
-    //origin: 'http://localhost:3001',
+    origin: 'http://localhost:3001',
     credentials: true,
 }));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(cookieParser('Cookie_Secret'));
+app.use('/public', express_1.default.static('public'));
+app.use('/static/js', express_1.default.static('public/static/js'));
+app.use('/static', express_1.default.static('static'));
 function authorizeUser(req, res, next) {
     const token = req.cookies.token;
     console.log("cookies: ", req.cookies);
@@ -91,17 +85,17 @@ function authorizeUser(req, res, next) {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-app.get('/manifest.json', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
-});
-app.get('/static/js/:file', (req, res) => {
-    console.log(req.params.file);
-    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
-});
-app.get('/static/css/:file', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-});
-app.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+/* app.get('/manifest.json', (req: Request, res: Response) => {
+   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+})
+app.get('/static/js/:file', (req: Request, res: Response) => {
+   console.log('js' + req.params.file)
+   res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
+})
+app.get('/static/css/:file', (req: Request, res: Response) => {
+   res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
+}) */
+app.post('/login', async (req, res, next) => {
     const { email, password } = req.body;
     try {
         if (!(email && password)) {
@@ -109,7 +103,7 @@ app.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             res.status(200).send({ error: { message: 'Please provide full credentials' } });
         }
         else {
-            const user = yield db.getUser(email, password);
+            const user = await db.getUser(email, password);
             if (!user) {
                 res.status(200).json({ error: { message: 'Unauthorize' } });
                 return;
@@ -142,89 +136,89 @@ app.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const error = new Error("Error! Something went wrong.");
         return next(error);
     }
-}));
-app.get('/user', authorizeUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/user', authorizeUser, async (req, res, next) => {
     const { userId } = req.query;
-    return yield db.getUserById(userId);
+    return await db.getUserById(userId);
     //should also return all the products that the user is selling
-}));
-app.post('/user', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.post('/user', async (req, res) => {
     const { name, email, password } = req.body;
     if (!(name && email && password)) {
         //400 = Bad req
         res.status(200).send({ error: { message: 'Please provide full credentials' } });
     }
     else {
-        res.status(200).json(yield db.createUser(name, email, password));
+        res.status(200).json(await db.createUser(name, email, password));
     }
-}));
-app.get('/cart', authorizeUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/cart', authorizeUser, async (req, res, next) => {
     const id = req.cookies.id;
     if (!id)
         return [];
-    const cart = yield db.getCart(id, []);
+    const cart = await db.getCart(id, []);
     res.status(200).json({
         cart: cart
     });
-}));
-app.post('/cart', authorizeUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.post('/cart', authorizeUser, async (req, res, next) => {
     const id = req.cookies.id;
     const product = req.body.productId; // _localhost/cart?id=*
     if (!id && !product)
         res.status(400).send({ error: { message: 'Empty info' } });
-    const cart = yield db.addCart(id, product);
+    const cart = await db.addCart(id, product);
     res.status(200).json({
         cart: cart
     });
-}));
-app.get('/product', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/product', async (req, res, next) => {
     const { name } = req.query;
-    const products = yield db.getProductListForSearch(name);
+    const products = await db.getProductListForSearch(name);
     res.status(200).json({
         succes: true,
         data: {
             products: products
         }
     });
-}));
-app.get('/products_list', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/products_list', async (req, res, next) => {
     const { name } = req.query;
-    const products = yield db.getProductListByName(name);
+    const products = await db.getProductListByName(name);
     res.status(200).json({
         succes: true,
         data: {
             products: products
         }
     });
-}));
-app.get('/product/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/product/:id', async (req, res, next) => {
     const id = req.params.id;
-    const product = yield db.getProductById(id);
+    const product = await db.getProductById(id);
     res.status(200).json(product);
-}));
-app.post('/product', authorizeUser, upload.array('photos'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.status(200).json(yield db.createProduct(req.body, req.files.map((file) => file.path)));
-}));
-app.get('/category', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.post('/product', authorizeUser, upload.array('photos'), async (req, res, next) => {
+    res.status(200).json(await db.createProduct(req.body, req.files.map((file) => file.path)));
+});
+app.get('/category', async (req, res, next) => {
     const { name } = req.query;
-    const products = yield db.getProductListByCategory(name);
+    const products = await db.getProductListByCategory(name);
     res.status(200).json({
         products: products
     });
-}));
-app.get('/category/offerts/:name', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get('/category/offerts/:name', async (req, res, next) => {
     const { name } = req.query;
-    res.status(200).json(yield db.getOffertsByCategory(name));
-}));
-app.get('/static/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    res.status(200).json(await db.getOffertsByCategory(name));
+});
+app.get('/static/:id', async (req, res, next) => {
     let options = {
         root: path.join(__dirname)
     };
     res.sendFile(`./static/${req.params.id}`, options);
-}));
-/* app.get('/*', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-}) */
+});
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });

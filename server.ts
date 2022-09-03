@@ -31,15 +31,18 @@ const port = process.env.PORT || 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   origin: 'https://mercado-libre-clone-repo.herokuapp.com',
+   //origin: 'https://mercado-libre-clone-repo.herokuapp.com',
    //origin: 'https://mercado-libre-clon.web.app',
-   //origin: 'http://localhost:3001',
+   origin: 'http://localhost:3001',
    credentials: true,
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
+app.use('/public', express.static('public'))
+app.use('/static/js', express.static('public/static/js'))
+app.use('/static', express.static('static'))
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    const token = req.cookies.token
@@ -66,16 +69,16 @@ app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
 
-app.get('/manifest.json', (req: Request, res: Response) => {
+/* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
-   console.log(req.params.file)
+   console.log('js' + req.params.file)
    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
 })
 app.get('/static/css/:file', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-})
+}) */
 
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
@@ -202,6 +205,7 @@ app.get('/category/offerts/:name', async (req: any, res: Response, next: Callabl
       await db.getOffertsByCategory(name as string)
    )
 })
+
 app.get('/static/:id', async (req: Request, res: Response, next: CallableFunction) => {
    let options = {
       root: path.join(__dirname)
@@ -209,9 +213,9 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    res.sendFile(`./static/${req.params.id}`, options)
 })
 
-/* app.get('/*', (req: Request, res: Response) => {
+app.get('*', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-}) */
+})
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
