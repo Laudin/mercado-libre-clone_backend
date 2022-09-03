@@ -65,7 +65,7 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(cookieParser('Cookie_Secret'));
 app.use('/public', express_1.default.static('public'));
-app.use('/static/js', express_1.default.static('public/static/js'));
+app.use('/public/static/js/', express_1.default.static('public/static/js/'));
 app.use('/static', express_1.default.static('static'));
 function authorizeUser(req, res, next) {
     const token = req.cookies.token;
