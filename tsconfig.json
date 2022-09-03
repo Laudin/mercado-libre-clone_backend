@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
         "strict": true,
-        "lib": ["esnext"],
+        "lib": ["es6"],
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es6",
         "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true,
-        "outDir": ".",
+        "outDir": "dist",
         "baseUrl": ".",
         "paths": {
             "*": ["node_modules/*"]

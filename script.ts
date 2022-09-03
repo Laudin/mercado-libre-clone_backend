@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { equal } from 'assert'
 const prisma = new PrismaClient()
 
 export async function getUser(email: string, password: string) {
