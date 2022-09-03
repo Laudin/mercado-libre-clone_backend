@@ -213,9 +213,9 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    res.sendFile(`./static/${req.params.id}`, options)
 })
 
-app.get('*', (req: Request, res: Response) => {
+/* app.get('*', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-})
+}) */
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
