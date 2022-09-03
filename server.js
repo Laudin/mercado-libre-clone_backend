@@ -56,9 +56,9 @@ const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
 const secret = 'jwt_secret';
 app.use(cors({
-    //origin: 'https://mercado-libre-clone-repo.herokuapp.com',
+    origin: 'https://mercado-libre-clone-repo.herokuapp.com',
     //origin: 'https://mercado-libre-clon.web.app',
-    origin: 'http://localhost:3001',
+    //origin: 'http://localhost:3001',
     credentials: true,
 }));
 app.use(express_1.default.json());
