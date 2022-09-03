@@ -35,7 +35,7 @@ const port = 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   origin: 'http://localhost:3000',
+   origin: 'https://mercado-libre-clon.web.app',
    credentials: true,
 }))
 app.use(express.json())
@@ -66,6 +66,9 @@ function authorizeUser(req: Request, res: Response, next: CallableFunction) {
 
 app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+})
+app.get('/manifest.json', (req: Request, res: Response) => {
+   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
@@ -151,7 +154,6 @@ app.post('/cart', authorizeUser, async (req: Request, res: Response, next: Calla
       cart: cart
    })
 })
-
 app.get('/product', async (req: Request, res: Response, next: CallableFunction) => {
    const { name } = req.query
    const products = await db.getProductListForSearch(name as string)
@@ -184,15 +186,17 @@ app.post('/product', authorizeUser, upload.array('photos'), async (req: any, res
       await db.createProduct(req.body, req.files.map((file: any) => file.path))
    )
 })
-app.get('/category/:categoryId', async (req: Request, res: Response, next: CallableFunction) => {
-   const products = await db.getProductListByCategory(req.params.categoryId)
+app.get('/category', async (req: Request, res: Response, next: CallableFunction) => {
+   const { name } = req.query
+   const products = await db.getProductListByCategory(name as string)
    res.status(200).json({
       products: products
    })
 })
-app.get('/category/offerts/:categoryId', async (req: any, res: Response, next: CallableFunction) => {
+app.get('/category/offerts/:name', async (req: any, res: Response, next: CallableFunction) => {
+   const { name } = req.query
    res.status(200).json(
-      await db.getOffertsByCategory(req.params.categoryId)
+      await db.getOffertsByCategory(name as string)
    )
 })
 app.get('/static/:id', async (req: Request, res: Response, next: CallableFunction) => {
@@ -202,9 +206,6 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    res.sendFile(`static/${req.params.id}`, options)
 })
 
-app.get('/*', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', '404.html'));
-})
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
