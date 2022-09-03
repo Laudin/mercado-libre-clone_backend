@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node server.js",
+    "start": "node server.js",
     "startdev": "nodemon server.ts"
   },
   "keywords": [],
