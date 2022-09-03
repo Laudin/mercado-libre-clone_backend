@@ -35,8 +35,8 @@ const port = 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   //origin: 'https://mercado-libre-clon.web.app',
-   origin: 'http://localhost:3001',
+   origin: 'https://mercado-libre-clon.web.app',
+   //origin: 'http://localhost:3001',
    credentials: true,
 }))
 app.use(express.json())
@@ -78,7 +78,7 @@ app.get('/static/js/:file', (req: Request, res: Response) => {
 app.get('/static/css/:file', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
 }) */
-app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
+app.post('/api/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
    try {
       if (!(email && password)) {
@@ -122,12 +122,12 @@ app.post('/login', async (req: Request, res: Response, next: CallableFunction) =
       return next(error);
    }
 })
-app.get('/user', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
+app.get('/api/user', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
    const { userId } = req.query
    return await db.getUserById(userId as string)
    //should also return all the products that the user is selling
 })
-app.post('/user', async (req: Request, res: Response) => {
+app.post('/api/user', async (req: Request, res: Response) => {
    const { name, email, password } = req.body
    if (!(name && email && password)) {
       //400 = Bad req
@@ -208,6 +208,9 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    res.sendFile(`static/${req.params.id}`, options)
 })
 
+/* app.get('/*', (req: Request, res: Response) => {
+   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+}) */
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
