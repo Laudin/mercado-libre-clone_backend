@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "server.ts",
+    "build": "tsc",
+    "start": "npm run build && node server.js",
     "startdev": "nodemon server.ts"
   },
   "keywords": [],

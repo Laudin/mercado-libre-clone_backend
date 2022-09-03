@@ -1,15 +1,11 @@
 import express, { Request, Response } from 'express'
 import * as db from './script'
+
 const cookieParser = require('cookie-parser')
 const { v4: uuidv4 } = require('uuid');
 const path = require('path')
 const multer = require('multer')
-interface File {
-   filedname: string,
-   originalname: string,
-   encoding: string,
-   mimetype: string
-}
+
 const fs = require('fs');
 const storage = multer.diskStorage({
    destination: async (req: Request, files: any, cb: CallableFunction) => {
@@ -78,7 +74,7 @@ app.get('/static/js/:file', (req: Request, res: Response) => {
 app.get('/static/css/:file', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
 }) */
-app.post('/api/login', async (req: Request, res: Response, next: CallableFunction) => {
+app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
    try {
       if (!(email && password)) {
@@ -122,12 +118,12 @@ app.post('/api/login', async (req: Request, res: Response, next: CallableFunctio
       return next(error);
    }
 })
-app.get('/api/user', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
+app.get('/user', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
    const { userId } = req.query
    return await db.getUserById(userId as string)
    //should also return all the products that the user is selling
 })
-app.post('/api/user', async (req: Request, res: Response) => {
+app.post('/user', async (req: Request, res: Response) => {
    const { name, email, password } = req.body
    if (!(name && email && password)) {
       //400 = Bad req
@@ -156,6 +152,7 @@ app.post('/cart', authorizeUser, async (req: Request, res: Response, next: Calla
       cart: cart
    })
 })
+
 app.get('/product', async (req: Request, res: Response, next: CallableFunction) => {
    const { name } = req.query
    const products = await db.getProductListForSearch(name as string)
@@ -188,6 +185,7 @@ app.post('/product', authorizeUser, upload.array('photos'), async (req: any, res
       await db.createProduct(req.body, req.files.map((file: any) => file.path))
    )
 })
+
 app.get('/category', async (req: Request, res: Response, next: CallableFunction) => {
    const { name } = req.query
    const products = await db.getProductListByCategory(name as string)
@@ -205,7 +203,7 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    let options = {
       root: path.join(__dirname)
    }
-   res.sendFile(`static/${req.params.id}`, options)
+   res.sendFile(`./static/${req.params.id}`, options)
 })
 
 /* app.get('/*', (req: Request, res: Response) => {
