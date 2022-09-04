@@ -68,16 +68,16 @@ app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
 
-/* app.get('/manifest.json', (req: Request, res: Response) => {
+app.get('/public/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
-app.get('/static/js/:file', (req: Request, res: Response) => {
+app.get('/public/static/js/:file', (req: Request, res: Response) => {
    console.log('js' + req.params.file)
    res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
 })
-app.get('/static/css/:file', (req: Request, res: Response) => {
+app.get('/public/static/css/:file', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-}) */
+})
 
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
