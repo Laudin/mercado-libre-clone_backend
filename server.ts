@@ -40,8 +40,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
-app.use('/public/static/js', express.static('public/static/js'))
-app.use('/public', express.static('public'))
+app.use('/public/static/js', express.static('public'))
+app.use('/public/*', express.static('public'))
 app.use('/static', express.static('static'))
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
@@ -71,7 +71,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/public/static/js/:file', (req: Request, res: Response) => {
    console.log('js' + req.params.file)
-   res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
+   res.sendFile(path.join('public', 'static', 'js', `${req.params.file}`));
 })
 /* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
