@@ -64,9 +64,8 @@ app.use(cors({
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(cookieParser('Cookie_Secret'));
-app.use('/public', express_1.default.static('public'));
-app.use('/public/static/js/', express_1.default.static('public/static/js/'));
-app.use('/static', express_1.default.static('static'));
+app.use(express_1.default.static('public'));
+app.use(express_1.default.static('static'));
 function authorizeUser(req, res, next) {
     const token = req.cookies.token;
     console.log("cookies: ", req.cookies);
@@ -85,14 +84,23 @@ function authorizeUser(req, res, next) {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+// doesnt work..
 /* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
    console.log('js' + req.params.file)
-   res.sendFile(path.join(__dirname, 'public', 'static', 'js', `${req.params.file}`));
+   let options = {
+      root: path.join(__dirname)
+   }
+   res.sendFile(`./public/static/js/${req.params.file}`, options)
+   //res.sendFile(path.join('./', 'public', 'static', 'js', `${req.params.file}`));
 })
 app.get('/static/css/:file', (req: Request, res: Response) => {
+   let options = {
+      root: path.join(__dirname)
+   }
+   res.sendFile(`./public/static/css/${req.params.file}`, options)
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
 }) */
 app.post('/login', async (req, res, next) => {
@@ -210,15 +218,9 @@ app.get('/category/offerts/:name', async (req, res, next) => {
     const { name } = req.query;
     res.status(200).json(await db.getOffertsByCategory(name));
 });
-app.get('/static/:id', async (req, res, next) => {
-    let options = {
-        root: path.join(__dirname)
-    };
-    res.sendFile(`./static/${req.params.id}`, options);
-});
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+/* app.get('*', (req: Request, res: Response) => {
+   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+}) */
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
