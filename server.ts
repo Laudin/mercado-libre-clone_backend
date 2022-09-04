@@ -40,8 +40,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
-app.use(express.static('public'))
-app.use(express.static('static'))
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'static')))
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    const token = req.cookies.token
