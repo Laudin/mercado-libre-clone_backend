@@ -218,7 +218,7 @@ app.get('/static/:id', async (req: Request, res: Response, next: CallableFunctio
    let options = {
       root: path.join(__dirname)
    }
-   res.sendFile(`./static/${req.params.id}`, options)
+   res.sendFile(`./static/${req.params.id}`)
 })
 
 /* app.get('*', (req: Request, res: Response) => {
