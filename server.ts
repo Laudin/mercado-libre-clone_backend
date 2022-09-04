@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
-app.use('/static/js', express.static(path.join(__dirname, 'public')))
+app.use('/static/js', express.static(path.join(__dirname, 'public', 'static', 'js')))
 app.use('/static', express.static(path.join(__dirname, 'static')))
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
