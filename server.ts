@@ -31,8 +31,8 @@ const port = process.env.PORT || 3001
 const secret = 'jwt_secret'
 
 app.use(cors({
-   origin: 'https://mercado-libre-clone-repo.herokuapp.com',
-   //origin: 'https://mercado-libre-clon.web.app',
+   //origin: 'https://mercado-libre-clone-repo.herokuapp.com',
+   origin: 'https://mercado-libre-clone-page.web.app',
    //origin: 'http://localhost:3001',
    credentials: true,
 }))
@@ -40,6 +40,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
+// serve files that are in /public directory to the req from the /public path prefix
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use('/static/js', express.static(path.join(__dirname, 'public', 'static', 'js')))
 app.use('/static', express.static(path.join(__dirname, 'static')))
@@ -68,26 +69,6 @@ function authorizeUser(req: Request, res: Response, next: CallableFunction) {
 app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
-
-// doesnt work..
-/* app.get('/manifest.json', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
-})
-app.get('/static/js/:file', (req: Request, res: Response) => {
-   console.log('js' + req.params.file)
-   let options = {
-      root: path.join(__dirname)
-   }
-   res.sendFile(`./public/static/js/${req.params.file}`, options)
-   //res.sendFile(path.join('./', 'public', 'static', 'js', `${req.params.file}`));
-})
-app.get('/static/css/:file', (req: Request, res: Response) => {
-   let options = {
-      root: path.join(__dirname)
-   }
-   res.sendFile(`./public/static/css/${req.params.file}`, options)
-   res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-}) */
 
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
@@ -216,9 +197,9 @@ app.get('/category/offerts/:name', async (req: any, res: Response, next: Callabl
 })
 
 
-/* app.get('*', (req: Request, res: Response) => {
+app.get('*', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-}) */
+})
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
