@@ -40,7 +40,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
-app.use('/public/static/js', express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use('/public', express.static('public'))
 app.use('/static', express.static('static'))
 
@@ -69,10 +69,6 @@ app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
 
-app.get('/public/static/js/:file', (req: Request, res: Response) => {
-   console.log('js' + req.params.file)
-   res.sendFile(path.join('public', 'static', 'js', `${req.params.file}`));
-})
 /* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
