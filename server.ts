@@ -40,8 +40,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
-//app.use(express.static(path.join(__dirname, 'public')))
-//app.use('/static', express.static(path.join(__dirname, 'static')))
+app.use('/public', express.static(path.join(__dirname, 'public')))
+app.use('/static', express.static(path.join(__dirname, 'static')))
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    const token = req.cookies.token
@@ -68,7 +68,8 @@ app.get('/', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
 
-app.get('/manifest.json', (req: Request, res: Response) => {
+// doesnt work..
+/* app.get('/manifest.json', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 })
 app.get('/static/js/:file', (req: Request, res: Response) => {
@@ -85,7 +86,7 @@ app.get('/static/css/:file', (req: Request, res: Response) => {
    }
    res.sendFile(`./public/static/css/${req.params.file}`, options)
    res.sendFile(path.join(__dirname, 'public', 'static', 'css', `${req.params.file}`));
-})
+}) */
 
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
@@ -213,13 +214,6 @@ app.get('/category/offerts/:name', async (req: any, res: Response, next: Callabl
    )
 })
 
-app.get('/static/:id', async (req: Request, res: Response, next: CallableFunction) => {
-   console.log(req.params)
-   let options = {
-      root: path.join(__dirname)
-   }
-   res.sendFile(`./static/${req.params.id}`)
-})
 
 /* app.get('*', (req: Request, res: Response) => {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
