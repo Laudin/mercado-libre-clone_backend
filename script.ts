@@ -189,12 +189,13 @@ async function main() {
          categoryName: 'Electrodomésticos'
       }
    }) */
-   /* const query = await prisma.category.create({
-      data: {
-         name: 'Electrodomésticos'
-      }
-   }) */
-   //console.log(product)
+   /*    console.log(await prisma.category.create({
+         data: {
+            id: 'farmacia',
+            name: 'farmacia',
+            banner: 'farmacia_banner.png'
+         }
+      })) */
 }
 
 main()
