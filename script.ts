@@ -103,6 +103,8 @@ export async function getProductById(id: string) {
       console.log(err)
    }
 }
+
+// for the search BAR
 export async function getProductListForSearch(name: string) {
    if (!name) return []
    try {
@@ -124,6 +126,8 @@ export async function getProductListForSearch(name: string) {
       console.log(err)
    }
 }
+
+// for the search result PAGE
 export async function getProductListByName(name: string) {
    if (!name) return []
    try {
@@ -135,6 +139,18 @@ export async function getProductListByName(name: string) {
             },
          },
          take: 20, //return only 6
+      })
+      return products
+   } catch (err) {
+      console.log(err)
+   }
+}
+export async function getProductsByUser(user: string) {
+   try {
+      const products = await prisma.product.findMany({
+         where: {
+            sellerId: user,
+         }
       })
       return products
    } catch (err) {
@@ -168,7 +184,18 @@ export async function createProduct(product: any, photos: any) {
    } catch (err) {
       console.log(err)
    }
-
+}
+export async function deleteProductById(id: string) {
+   try {
+      const product = await prisma.product.delete({
+         where: {
+            id: id,
+         }
+      })
+      return 'producto eliminado con éxito'
+   } catch (err) {
+      console.log(err)
+   }
 }
 export async function getProductListByCategory(id: string) {
    try {

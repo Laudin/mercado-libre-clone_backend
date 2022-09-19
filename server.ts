@@ -176,14 +176,28 @@ app.get('/product/:id', async (req: Request, res: Response, next: CallableFuncti
       product
    )
 })
+app.get('/product/user/:id', async (req: Request, res: Response, next: CallableFunction) => {
+   const id = req.params.id
+   res.status(200).json({
+      succes: true,
+      data: await db.getProductsByUser(id)
+   })
+})
 app.post('/product', authorizeUser, upload.array('photos'), async (req: any, res: Response, next: CallableFunction) => {
    res.status(200).json(
       await db.createProduct(req.body, req.files.map((file: any) => file.path))
    )
 })
+app.delete('/product/:id', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
+   const id = req.params.id
+   res.status(200).json({
+      succes: true,
+      data: await db.deleteProductById(id)
+   })
+})
 
-app.get('/category', async (req: Request, res: Response, next: CallableFunction) => {
-   const { name } = req.query
+app.get('/category/:name', async (req: Request, res: Response, next: CallableFunction) => {
+   const { name } = req.params
    const products = await db.getProductListByCategory(name as string)
    res.status(200).json({
       products: products
