@@ -1,3 +1,4 @@
+import { FileFormat } from 'aws-sdk/clients/iotsitewise';
 import express, { Request, Response } from 'express'
 import * as db from './script'
 
@@ -7,20 +8,58 @@ const path = require('path')
 const multer = require('multer')
 
 const fs = require('fs');
+
+//const multerS3 = require('multer-s3')
+//const { S3Client } = require('@aws-sdk/client-s3')
+const AWS = require('aws-sdk')
+AWS.config.update({
+   accessKeyId: 'AKIATBB7UP3X4ZXRPBMB',
+   secretAccessKey: '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'
+})
+const s3 = new AWS.S3()
+
 const storage = multer.diskStorage({
    destination: async (req: Request, files: any, cb: CallableFunction) => {
       cb(null, `static/`)
    },
-   filename: (req: Request, files: any, cb: CallableFunction) => {
+   filename: async (req: Request, files: any, cb: CallableFunction) => {
       //creates a unique id for the img. checks if it exist first
+      let filename = ''
       while (true) {
-         const name = uuidv4()
+         const name = uuidv4() // ALMOST unique key, better solutions would be the file hash
          const extention = files.originalname.match(/[.]\w+$/)
          if (!fs.existsSync(`static/${name}${extention}`)) {
-            cb(null, `${name}${extention}`)
+            filename = `static/${name}${extention}`
+            await cb(null, `${name}${extention}`)
             break
          }
       }
+
+      // temp solution to wait for the file to be writen
+      let fileContent = ''
+      while (!fs.existsSync(filename)) {
+         try {
+            fileContent = await fs.readFileSync(filename)
+         } catch (error) {
+            console.log('error')
+         }
+      }
+      console.log(filename)
+      const params = {
+         Bucket: 'mercadolibre-static',
+         Key: filename,
+         Body: fileContent,
+         ACL: 'public-read',
+         ContentType: files.mimetype
+      }
+      await s3.upload(params, function (err: any, data: any) {
+         console.log(err, data)
+      })
+
+      fs.unlink(filename, (err: any) => {
+         if (err) throw err;
+      });
+      // console.log(files)
    }
 })
 const upload = multer({ storage: storage })
@@ -29,6 +68,7 @@ const jwt = require('jsonwebtoken')
 const app = express()
 const port = process.env.PORT || 3001
 const secret = 'jwt_secret'
+
 
 app.use(cors({
    origin: 'https://mercado-libre-clone-repo.herokuapp.com',
@@ -43,7 +83,29 @@ app.use(cookieParser('Cookie_Secret'))
 // serve files that are in /public directory to the req from the /public path prefix
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use('/static/js', express.static(path.join(__dirname, 'public', 'static', 'js')))
-app.use('/static', express.static(path.join(__dirname, 'static')))
+//app.use('/static', express.static(path.join(__dirname, 'static')))
+
+app.get('/images', (req: Request, res: Response, next: CallableFunction) => {
+   const getImage = async () => {
+      const data = s3.getSignedUrl('getObject', {
+         Bucket: 'mercadolibre-static',
+         Key: 'static/82b71b9e-6a95-4c1a-88ec-4ee1553db617.png'
+      })
+      console.log(data)
+      return data
+   }
+   const encode = (data: any) => {
+      let buf = Buffer.from(data);
+      let base64 = buf.toString('base64');
+      return base64
+   }
+
+   getImage().then((img: any) => {
+      //console.log(img.Body)
+      res.send(img)
+   })
+})
+
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    const token = req.cookies.token
@@ -67,7 +129,7 @@ function authorizeUser(req: Request, res: Response, next: CallableFunction) {
 }
 
 app.get('/', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+   res.sendFile(path.join(__dirname, 'index.html'));
 })
 
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
@@ -210,11 +272,21 @@ app.get('/category/offerts/:name', async (req: any, res: Response, next: Callabl
    )
 })
 
+app.post('/upload', upload.array('photos'), async (req: any, res: Response, next: CallableFunction) => {
+   res.status(200).json({
+      message: 'imagen subida con éxito'
+   })
+})
 
 app.get('*', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+   res.sendFile(path.join(__dirname, 'index.html'));
 })
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
 })
+
+module.exports = {
+   app,
+   port
+}
