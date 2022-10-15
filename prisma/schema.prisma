@@ -22,29 +22,26 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  brand       String
-  model       String
-  offert      Int?
-  stock       Int
-  state       String
-  photos      String[]
-  price       Float
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  seller      User     @relation("seller", fields: [sellerId], references: [id])
-  sellerId    String
-  category    Category @relation("category", fields: [categoryId], references: [id])
-  categoryId  String
+  id           String   @id @default(uuid())
+  name         String
+  brand        String
+  model        String
+  stock        Int
+  state        String
+  photos       String[]
+  price        Float
+  description  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  seller       User     @relation("seller", fields: [sellerId], references: [id])
+  sellerId     String
+  category     Category @relation("category", fields: [categoryName], references: [name])
+  categoryName String
 
-  @@index([id])
+  @@index([name])
 }
 
 model Category {
-  id      String    @id @unique @default(uuid())
-  name    String
-  banner  String
+  name    String    @id @unique @default(uuid())
   Product Product[] @relation("category")
 }

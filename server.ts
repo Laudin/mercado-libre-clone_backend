@@ -1,116 +1,51 @@
-import { FileFormat } from 'aws-sdk/clients/iotsitewise';
 import express, { Request, Response } from 'express'
 import * as db from './script'
-
 const cookieParser = require('cookie-parser')
 const { v4: uuidv4 } = require('uuid');
 const path = require('path')
 const multer = require('multer')
-
+interface File {
+   filedname: string,
+   originalname: string,
+   encoding: string,
+   mimetype: string
+}
 const fs = require('fs');
-
-//const multerS3 = require('multer-s3')
-//const { S3Client } = require('@aws-sdk/client-s3')
-const AWS = require('aws-sdk')
-AWS.config.update({
-   accessKeyId: process.env.ACCESS_KEY_ID,
-   secretAccessKey: process.env.SECRET_ACCESS_KEY
-})
-const s3 = new AWS.S3()
-
 const storage = multer.diskStorage({
    destination: async (req: Request, files: any, cb: CallableFunction) => {
       cb(null, `static/`)
    },
-   filename: async (req: Request, files: any, cb: CallableFunction) => {
+   filename: (req: Request, files: any, cb: CallableFunction) => {
       //creates a unique id for the img. checks if it exist first
-      let filename = ''
       while (true) {
-         const name = uuidv4() // ALMOST unique key, better solutions would be the file hash
+         const name = uuidv4()
          const extention = files.originalname.match(/[.]\w+$/)
          if (!fs.existsSync(`static/${name}${extention}`)) {
-            filename = `static/${name}${extention}`
-            await cb(null, `${name}${extention}`)
+            cb(null, `${name}${extention}`)
             break
          }
       }
-
-      // temp solution to wait for the file to be writen
-      let fileContent = ''
-      while (!fs.existsSync(filename)) {
-         try {
-            fileContent = await fs.readFileSync(filename)
-         } catch (error) {
-            console.log('error')
-         }
-      }
-      console.log(filename)
-      const params = {
-         Bucket: 'mercadolibre-static',
-         Key: filename,
-         Body: fileContent,
-         ACL: 'public-read',
-         ContentType: files.mimetype
-      }
-      await s3.upload(params, function (err: any, data: any) {
-         console.log(err, data)
-      })
-
-      fs.unlink(filename, (err: any) => {
-         if (err) throw err;
-      });
-      // console.log(files)
    }
 })
 const upload = multer({ storage: storage })
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const app = express()
-const port = process.env.PORT || 3001
+const port = 3001
 const secret = 'jwt_secret'
 
-
 app.use(cors({
-   origin: 'https://mercado-libre-clone-repo.herokuapp.com',
-   //origin: 'https://mercado-libre-clone-page.web.app',
-   //origin: 'http://localhost:3001',
+   origin: 'http://localhost:3000',
    credentials: true,
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('Cookie_Secret'))
 
-// serve files that are in /public directory to the req from the /public path prefix
-app.use('/public', express.static(path.join(__dirname, 'public')))
-app.use('/static/js', express.static(path.join(__dirname, 'public', 'static', 'js')))
-//app.use('/static', express.static(path.join(__dirname, 'static')))
-
-app.get('/images', (req: Request, res: Response, next: CallableFunction) => {
-   const getImage = async () => {
-      const data = s3.getSignedUrl('getObject', {
-         Bucket: 'mercadolibre-static',
-         Key: 'static/82b71b9e-6a95-4c1a-88ec-4ee1553db617.png'
-      })
-      console.log(data)
-      return data
-   }
-   const encode = (data: any) => {
-      let buf = Buffer.from(data);
-      let base64 = buf.toString('base64');
-      return base64
-   }
-
-   getImage().then((img: any) => {
-      //console.log(img.Body)
-      res.send(img)
-   })
-})
-
 
 function authorizeUser(req: Request, res: Response, next: CallableFunction) {
    const token = req.cookies.token
 
-   console.log("cookies: ", req.cookies)
    console.log("token: ", req.cookies.token)
 
    if (!token) {
@@ -129,9 +64,10 @@ function authorizeUser(req: Request, res: Response, next: CallableFunction) {
 }
 
 app.get('/', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'index.html'));
+   res.status(200).json({
+      "Time": new Date().toISOString()
+   })
 })
-
 app.post('/login', async (req: Request, res: Response, next: CallableFunction) => {
    const { email, password } = req.body
    try {
@@ -149,7 +85,7 @@ app.post('/login', async (req: Request, res: Response, next: CallableFunction) =
             //Creating jwt token
             token = jwt.sign(
                { userId: user.id, email: user.email },
-               secret,
+               "secretkeyappearshere",
                { expiresIn: "168h" } // 1 week
             );
          } catch (err) {
@@ -157,9 +93,6 @@ app.post('/login', async (req: Request, res: Response, next: CallableFunction) =
             const error = new Error("Error! Something went wrong creating the token.");
             return next(error);
          }
-
-         console.log('jwt: ' + token)
-
          res.cookie('token', token, { maxAge: 30 * 24 * 60 * 60 }) // attach the cookie to the res
          res.status(200).json({
             success: true,
@@ -238,55 +171,28 @@ app.get('/product/:id', async (req: Request, res: Response, next: CallableFuncti
       product
    )
 })
-app.get('/product/user/:id', async (req: Request, res: Response, next: CallableFunction) => {
-   const id = req.params.id
-   res.status(200).json({
-      succes: true,
-      data: await db.getProductsByUser(id)
-   })
-})
 app.post('/product', authorizeUser, upload.array('photos'), async (req: any, res: Response, next: CallableFunction) => {
+   //console.log(req.files)
+   //console.log(req.body)
    res.status(200).json(
       await db.createProduct(req.body, req.files.map((file: any) => file.path))
    )
 })
-app.delete('/product/:id', authorizeUser, async (req: Request, res: Response, next: CallableFunction) => {
-   const id = req.params.id
-   res.status(200).json({
-      succes: true,
-      data: await db.deleteProductById(id)
-   })
-})
 
-app.get('/category/:name', async (req: Request, res: Response, next: CallableFunction) => {
-   const { name } = req.params
+app.get('/category', async (req: Request, res: Response, next: CallableFunction) => {
+   const { name } = req.query
    const products = await db.getProductListByCategory(name as string)
    res.status(200).json({
       products: products
    })
 })
-app.get('/category/offerts/:name', async (req: any, res: Response, next: CallableFunction) => {
-   const { name } = req.query
-   res.status(200).json(
-      await db.getOffertsByCategory(name as string)
-   )
-})
-
-app.post('/upload', upload.array('photos'), async (req: any, res: Response, next: CallableFunction) => {
-   res.status(200).json({
-      message: 'imagen subida con éxito'
-   })
-})
-
-app.get('*', (req: Request, res: Response) => {
-   res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/static/:id', async (req: Request, res: Response, next: CallableFunction) => {
+   let options = {
+      root: path.join(__dirname)
+   }
+   res.sendFile(`static/${req.params.id}`, options)
 })
 
 app.listen(port, () => {
    console.log(`Server listening on port ${port}`)
 })
-
-module.exports = {
-   app,
-   port
-}
